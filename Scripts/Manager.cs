@@ -8,7 +8,7 @@ using System;
 #endif
 
 namespace HapticFeedback {
-    public enum HapticTypes { Selection, Success, Warning, Failure, LightImpact, MediumImpact, HeavyImpact, None }
+    public enum HapticTypes { Selection, Success, Warning, Failure, LightImpact, MediumImpact, HeavyImpact }
 
     /// <summary>
     /// This class allows developers to call vibration + haptic feedback on Android and iOS (generically or individually)
@@ -38,22 +38,40 @@ namespace HapticFeedback {
         public static int MediumAmplitude = 120;
         public static int HeavyAmplitude = 255;
         private static int _sdkVersion = -1;
-        private static long[] _lightimpactPattern = {0, LightDuration};
-        private static int[] _lightimpactPatternAmplitude = {0, LightAmplitude};
-        private static long[] _mediumimpactPattern = {0, MediumDuration};
-        private static int[] _mediumimpactPatternAmplitude = {0, MediumAmplitude};
-        private static long[] _HeavyimpactPattern = {0, HeavyDuration};
-        private static int[] _HeavyimpactPatternAmplitude = {0, HeavyAmplitude};
-        private static long[] _successPattern = {0, LightDuration, LightDuration, HeavyDuration};
-        private static int[] _successPatternAmplitude = {0, LightAmplitude, 0, HeavyAmplitude};
-        private static long[] _warningPattern = {0, HeavyDuration, LightDuration, MediumDuration};
-        private static int[] _warningPatternAmplitude = {0, HeavyAmplitude, 0, MediumAmplitude};
 
-        private static long[] _failurePattern = {
-            0, MediumDuration, LightDuration, MediumDuration, LightDuration, HeavyDuration, LightDuration, LightDuration
-        };
-        private static int[] _failurePatternAmplitude = {0, MediumAmplitude, 0, MediumAmplitude, 0, HeavyAmplitude, 0, LightAmplitude};
+        #region Default haptic patterns
+        /// <summary>
+        /// These custom patterns are used to replicate haptic(iOS) behavior on Android
+        /// </summary>
+        private static readonly HapticPattern LightImpact = new HapticPattern(
+            duration: new[] {0, LightDuration}, 
+            amplitude: new[] {0, LightAmplitude},
+            repeatCount: -1);
+        private static readonly HapticPattern MediumImpact = new HapticPattern(
+            duration: new[] {0, MediumDuration}, 
+            amplitude: new[] {0, MediumAmplitude},
+            repeatCount: -1);
+        private static readonly HapticPattern HeavyImpact = new HapticPattern(
+            duration: new[] {0, HeavyDuration}, 
+            amplitude: new[] {0, HeavyAmplitude},
+            repeatCount: -1);
+        
+        private static readonly HapticPattern Success = new HapticPattern(
+            duration: new[] {0, LightDuration, LightDuration, HeavyDuration}, 
+            amplitude: new[] {0, LightAmplitude, 0, HeavyAmplitude},
+            repeatCount: -1);
 
+        private static readonly HapticPattern Warning = new HapticPattern(
+            duration: new[] {0, HeavyDuration, LightDuration, MediumDuration}, 
+            amplitude: new[] {0, HeavyAmplitude, 0, MediumAmplitude},
+            repeatCount: -1);
+        
+        private static readonly HapticPattern Failure = new HapticPattern(
+            duration: new[] {0, MediumDuration, LightDuration, MediumDuration, LightDuration, HeavyDuration, LightDuration, LightDuration}, 
+            amplitude: new[] {0, MediumAmplitude, 0, MediumAmplitude, 0, HeavyAmplitude, 0, LightAmplitude},
+            repeatCount: -1);
+        #endregion
+        
         /// <summary>
         /// Returns true if the current platform is Android, false otherwise.
         /// </summary>
@@ -82,53 +100,26 @@ namespace HapticFeedback {
         }
 
         /// <summary>
-        /// Triggers a simple vibration
-        /// </summary>
-        public static void Vibrate() {
-            if (IsAndroid)
-                AndroidVibrate(MediumDuration);
-            else if (IsiOS) 
-                iOSTriggerHaptics(HapticTypes.MediumImpact);
-        }
-
-        /// <summary>
         /// Triggers a haptic feedback of the specified type
         /// </summary>
         /// <param name="type">Type.</param>
         /// <param name="defaultToRegularVibrate">Should it default to regular vibrate if appropriate api is no found</param>
         public static void Haptic(HapticTypes type, bool defaultToRegularVibrate = false) {
+            if (IsAndroid)
+                AndroidTriggerHaptics(type);
+            else if (IsiOS) 
+                iOSTriggerHaptics(type, defaultToRegularVibrate);
+        }
+
+        public static void CustomHaptic(HapticPattern hapticPattern, bool defaultToRegularVibrate = false) {
             if (IsAndroid) {
-                switch (type) {
-                    case HapticTypes.None:
-                        // do nothing
-                        break;
-                    case HapticTypes.Selection:
-                        AndroidVibrate(LightDuration, LightAmplitude);
-                        break;
-                    case HapticTypes.Success:
-                        AndroidVibrate(_successPattern, _successPatternAmplitude, -1);
-                        break;
-                    case HapticTypes.Warning:
-                        AndroidVibrate(_warningPattern, _warningPatternAmplitude, -1);
-                        break;
-                    case HapticTypes.Failure:
-                        AndroidVibrate(_failurePattern, _failurePatternAmplitude, -1);
-                        break;
-                    case HapticTypes.LightImpact:
-                        AndroidVibrate(_lightimpactPattern, _lightimpactPatternAmplitude, -1);
-                        break;
-                    case HapticTypes.MediumImpact:
-                        AndroidVibrate(_mediumimpactPattern, _mediumimpactPatternAmplitude, -1);
-                        break;
-                    case HapticTypes.HeavyImpact:
-                        AndroidVibrate(_HeavyimpactPattern, _HeavyimpactPatternAmplitude, -1);
-                        break;
-                }
+                AndroidVibrate(hapticPattern.Duration, hapticPattern.Amplitude, hapticPattern.RepeatCount);
             }
             else if (IsiOS) {
-                iOSTriggerHaptics(type, defaultToRegularVibrate);
+                // todo : figure out how to custom haptic on IOS
             }
         }
+        
         #endregion
 
         #region Android specific code
@@ -157,6 +148,29 @@ namespace HapticFeedback {
         private static jvalue[] AndroidVibrateMethodRawClassParameters = null;
 #endif
 
+        /// <summary>
+        /// Provides a similar API to call default haptic patterns on Android 
+        /// </summary>
+        /// <param name="type">Default haptic enums</param>
+        private static void AndroidTriggerHaptics(HapticTypes type) {
+            switch (type) {
+                case HapticTypes.Selection:
+                    CustomHaptic(LightImpact); break;
+                case HapticTypes.Success:
+                    CustomHaptic(Success); break;
+                case HapticTypes.Warning:
+                    CustomHaptic(Warning); break;
+                case HapticTypes.Failure:
+                    CustomHaptic(Failure); break;
+                case HapticTypes.LightImpact:
+                    CustomHaptic(LightImpact); break;
+                case HapticTypes.MediumImpact:
+                    CustomHaptic(MediumImpact); break;
+                case HapticTypes.HeavyImpact:
+                    CustomHaptic(HeavyImpact); break;
+            }
+        }
+        
         /// <summary>
         /// Requests a default vibration on Android, for the specified duration, in milliseconds
         /// </summary>
@@ -444,5 +458,21 @@ namespace HapticFeedback {
 #endif
         }
         #endregion
+
+        public struct HapticPattern {
+            public HapticPattern(long[] duration, int[] amplitude, int repeatCount) {
+                Duration = duration;
+                Amplitude = amplitude;
+                RepeatCount = repeatCount;
+            }
+
+            public static HapticPattern Empty() {
+                return new HapticPattern(new long[1], new int[1], -1);
+            }
+
+            public long[] Duration { get; set; }
+            public int[] Amplitude { get; set; }
+            public int RepeatCount { get; set; }
+        }
     }
 }
