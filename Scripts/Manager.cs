@@ -461,20 +461,31 @@ namespace HapticFeedback {
             if (!_iOsHapticsInitialized) 
                 iOSInitializeHaptics();
 
-            // this will trigger a standard vibration on all the iOS devices that don't support haptic feedback
+            // Custom haptic feedback parser and player
             if (HapticsSupported()) {
                 var amplitudes = pattern.Amplitude;
                 var durations = pattern.Duration;
                 for (var i = 1; i < amplitudes.Length; i += 2) {
-                    // process waiting period
+                    // This data is unifyied on Android and IOS.
+                    // Even indexes are wait duration, odds are vibration duration according to Android API.
+                    //
+                    // Since custom durations are not available without resorting to private API on IOS
+                    // This convention is replicated -to an extent- on the IOS by the following logic. 
+                    //
+                    // Private API usage can cause app to be rejected by Apple
+                    // src : https://stackoverflow.com/questions/12966467/are-there-apis-for-custom-vibrations-in-ios
+                    
+                    
+                    // Process waiting period
+                    
                     var waitPeriod = (int) durations[i - 1];
                     if (waitPeriod > 0)
                         Thread.Sleep(waitPeriod);
 
-                    // process vibration period
+                    // Process vibration period
                     var amplitude = amplitudes[i];
-                    var cycleCount = (int) (durations[i] / MediumDuration);
-                    for (var j = 0; j < cycleCount; j++) {
+                    var vibrationCycleCount = Mathf.RoundToInt((durations[i] / MediumDuration));
+                    for (var j = 0; j < vibrationCycleCount; j++) {
                         if (amplitude < 86) {
                             LightImpactHaptic();
                         } else if (amplitude >= 86 && amplitude < 171) {
@@ -485,6 +496,7 @@ namespace HapticFeedback {
                     }
                 }
             }
+            // this will trigger a standard vibration on all the iOS devices that don't support haptic feedback
             else if (defaultToRegularVibrate) {
 #if UNITY_IOS
 					Handheld.Vibrate();
