@@ -45,39 +45,13 @@ namespace HapticFeedback {
 
         public void Vibrate() {
             if (!_isPatternCached) {
-                // wait vibrate wait vibrate wait vibrate...
-                var amplitudes = new List<int>();
-                var durations = new List<long>();
-                for (var time = 0.0f; time <= 1.001f; time += _sampleInterval) {
-                    var normalizedAmp = _amplitudeCurve.Evaluate(time);
-                    if (normalizedAmp < _threshold) {
-                        // waits
-                        amplitudes.Add( (int) (255 * normalizedAmp));
-                        durations.Add( (long) (_sampleInterval * 1000));
-
-                        // vibrates
-                        amplitudes.Add(0);
-                        durations.Add( 0);
-                    } else {
-                        // waits
-                        amplitudes.Add(0);
-                        durations.Add( 0);
-                        // vibrates
-                        amplitudes.Add( (int) (255 * normalizedAmp));
-                        durations.Add( (long) (_sampleInterval * 1000));
-                    }
-                }
-
-                for (int i = 0; i < amplitudes.Count; i ++) {
-                    Debug.Log("ampl: " + amplitudes[i] + "dura: " + durations[i]);
-                }
-                
-                _cachedVibrationPattern = new HapticPattern(durations.ToArray(), amplitudes.ToArray(), -1);
+                _cachedVibrationPattern = Parse.AnimationCurve(_amplitudeCurve, _sampleInterval, _threshold);
                 _isPatternCached = true;
             }
             CustomHaptic(_cachedVibrationPattern);
         }
 
+#if UNITY_EDITOR
         public string ToUrlParameter {
             get {
                 var amps = new StringBuilder("");
@@ -95,5 +69,6 @@ namespace HapticFeedback {
                 return "t=" + _sampleInterval + "&" + "a=" + amps;
             }
         }
+#endif
     }
 }
