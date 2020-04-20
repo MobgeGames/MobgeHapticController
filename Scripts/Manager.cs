@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Runtime.InteropServices;
 using System;
+using System.Threading;
+using Mobge;
+
 #if UNITY_IOS
 	using UnityEngine.iOS;
 #endif
@@ -116,7 +119,7 @@ namespace HapticFeedback {
                 AndroidVibrate(hapticPattern.Duration, hapticPattern.Amplitude, hapticPattern.RepeatCount);
             }
             else if (IsiOS) {
-                // todo : figure out how to custom haptic on IOS
+                iOSTriggerHaptics(hapticPattern, defaultToRegularVibrate);
             }
         }
         
@@ -445,6 +448,49 @@ namespace HapticFeedback {
 #endif
             }
         }
+        
+        
+        /// <summary>
+        /// iOS only : triggers a haptic feedback of the specified type
+        /// </summary>
+        /// <param name="type">Type.</param>
+        /// <param name="defaultToRegularVibrate"></param>
+        public static void iOSTriggerHaptics(HapticPattern pattern, bool defaultToRegularVibrate = false) {
+            if (!IsiOS)
+                return;
+            if (!_iOsHapticsInitialized) 
+                iOSInitializeHaptics();
+
+            // this will trigger a standard vibration on all the iOS devices that don't support haptic feedback
+            if (HapticsSupported()) {
+                var amplitudes = pattern.Amplitude;
+                var durations = pattern.Duration;
+                for (var i = 1; i < amplitudes.Length; i += 2) {
+                    // process waiting period
+                    var waitPeriod = (int) durations[i - 1];
+                    if (waitPeriod > 0)
+                        Thread.Sleep(waitPeriod);
+
+                    // process vibration period
+                    var amplitude = amplitudes[i];
+                    var cycleCount = (int) (durations[i] / MediumDuration);
+                    for (var j = 0; j < cycleCount; j++) {
+                        if (amplitude < 86) {
+                            LightImpactHaptic();
+                        } else if (amplitude >= 86 && amplitude < 171) {
+                            MediumImpactHaptic();
+                        } else { // 171 to 255
+                            HeavyImpactHaptic();
+                        }
+                    }
+                }
+            }
+            else if (defaultToRegularVibrate) {
+#if UNITY_IOS
+					Handheld.Vibrate();
+#endif
+            }
+        }
 
         /// <summary>
         /// Returns a string containing iOS SDK informations
@@ -470,9 +516,9 @@ namespace HapticFeedback {
                 return new HapticPattern(new long[1], new int[1], -1);
             }
 
-            public long[] Duration { get; set; }
-            public int[] Amplitude { get; set; }
-            public int RepeatCount { get; set; }
+            public long[] Duration { get; }
+            public int[] Amplitude { get; }
+            public int RepeatCount { get; }
         }
     }
 }
