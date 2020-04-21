@@ -32,13 +32,13 @@ namespace HapticFeedback {
             }
         }
 
-        public void Vibrate() {
+        public void Vibrate(bool defaultToRegularVibrate = false) {
             if (!_isPatternCached) {
                 _cachedVibrationPattern = Parse.AnimationCurve(_amplitudeCurve, _sampleInterval);
                 _isPatternCached = true;
             }
 
-            CustomHaptic(_cachedVibrationPattern);
+            CustomHaptic(_cachedVibrationPattern, defaultToRegularVibrate);
         }
 
 #if UNITY_EDITOR
