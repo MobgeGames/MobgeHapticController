@@ -84,6 +84,9 @@ namespace HapticFeedback {
 
         private void OnEnable() {
             _vibration = (VibrationDataObject) target;
+            if (_vibration.data.AmplitudeCurve == null) {
+                _vibration.data.AmplitudeCurve = new AnimationCurve();
+            }
             _isAutoDiscoveryOn = true;
             _activeVibrationServers = new List<IPEndPoint>();
             _client = new Client("VibeServer");
