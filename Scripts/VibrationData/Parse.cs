@@ -37,7 +37,7 @@ namespace HapticFeedback {
         public static HapticPattern VibrationQuery(HttpListenerRequest request) {
             var sampleInterval = (float) double.Parse(request.QueryString.Get("t"));
             string queryAmps = request.QueryString.Get("a");
-            string[] splicedAmps = queryAmps.Split(',');
+            string[] splicedAmps = queryAmps.Split(':');
             var length = splicedAmps.Length;
             var normalizedAmplitudes = new float[length];
             for (var i = 0; i < length; i++) {

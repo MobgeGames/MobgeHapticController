@@ -50,9 +50,9 @@ namespace HapticFeedback {
                     var value = _amplitudeCurve.Evaluate(time);
                     value = (float) Math.Round(value, 2);
                     if (value > 0)
-                        amps.Append(value + ",");
+                        amps.Append(value + ":");
                     else {
-                        amps.Append(0 + ",");
+                        amps.Append(0 + ":");
                     }
                 }
 
