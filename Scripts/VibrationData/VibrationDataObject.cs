@@ -60,7 +60,7 @@ namespace HapticFeedback {
 
                 // Removing unnecessary "," at the end of the amplitude parameter
                 amps.Remove(amps.Length - 1, 1);
-                return "t=" + _sampleInterval + "&" + "a=" + amps;
+                return "t=" + _sampleInterval.ToString(CultureInfo.InvariantCulture) + "&" + "a=" + amps;
             }
         }
 #endif
