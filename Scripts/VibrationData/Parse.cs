@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using System.Net;
 using UnityEngine;
@@ -14,15 +14,17 @@ namespace HapticFeedback {
         /// <param name="threshold">Amplitudes over threshold are considered as vibration.
         /// Under are considered as wait periods</param>
         /// <returns></returns>
-        public static HapticPattern AnimationCurve(AnimationCurve curve, float sampleInterval, float threshold) {
+        public static HapticPattern AnimationCurve(AnimationCurve curve, float sampleInterval) {
             var normalizedAmplitudes = new List<float>();
-            for (var time = 0.0f; time <= 1.001f; time += sampleInterval) {
+            var maxTime = curve.keys[curve.length - 1].time;
+            for (var time = 0.0f; time <= maxTime; time += sampleInterval) {
                 var a = curve.Evaluate(time);
+                a = (float) Math.Round(a, 2);
                 normalizedAmplitudes.Add(a);
             }
 
             var na = normalizedAmplitudes.ToArray();
-            return GeneratePattern(in na, sampleInterval, threshold);
+            return GeneratePattern(in na, sampleInterval);
         }
 
         /// <summary>
@@ -32,7 +34,7 @@ namespace HapticFeedback {
         /// <param name="request"></param>
         /// <param name="threshold"></param>
         /// <returns></returns>
-        public static HapticPattern VibrationQuery(HttpListenerRequest request, float threshold) {
+        public static HapticPattern VibrationQuery(HttpListenerRequest request) {
             var sampleInterval = (float) double.Parse(request.QueryString.Get("t"));
             string queryAmps = request.QueryString.Get("a");
             string[] splicedAmps = queryAmps.Split(',');
@@ -42,7 +44,7 @@ namespace HapticFeedback {
                 normalizedAmplitudes[i] = (float) double.Parse(splicedAmps[i]);
             }
 
-            return GeneratePattern(in normalizedAmplitudes, sampleInterval, threshold);
+            return GeneratePattern(in normalizedAmplitudes, sampleInterval);
         }
 
         /// <summary>
@@ -52,7 +54,7 @@ namespace HapticFeedback {
         /// <param name="interval"></param>
         /// <param name="threshold"></param>
         /// <returns>Actionable haptic pattern</returns>
-        private static HapticPattern GeneratePattern(in float[] normalizedAmplitudes, float interval, float threshold) {
+        private static HapticPattern GeneratePattern(in float[] normalizedAmplitudes, float interval) {
             var length = normalizedAmplitudes.Length;
             // Android demands amplitudes as integer array, durations as long array
             // ( however amplitudes are actually a byte array, as the maximum number for an amplitude is 255)
@@ -60,7 +62,7 @@ namespace HapticFeedback {
             var durations = new long[length * 2];
             var j = 0;
             for (var i = 0; i < length; i++) {
-                if (normalizedAmplitudes[i] < threshold) {
+                if (normalizedAmplitudes[i] <= 0) {
                     // waits
                     amplitudes[j] = (int) (255 * normalizedAmplitudes[i]);
                     durations[j] = (long) (interval * 1000);

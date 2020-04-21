@@ -4,7 +4,6 @@ using UnityEngine;
 using System.Runtime.InteropServices;
 using System;
 using System.Threading;
-using Mobge;
 
 #if UNITY_IOS
 	using UnityEngine.iOS;
