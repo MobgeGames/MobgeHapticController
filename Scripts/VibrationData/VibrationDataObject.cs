@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Text;
 using UnityEngine;
 using static HapticFeedback.Manager;
@@ -49,8 +50,9 @@ namespace HapticFeedback {
                 for (var time = 0.0f; time <= maxTime; time += _sampleInterval) {
                     var value = _amplitudeCurve.Evaluate(time);
                     value = (float) Math.Round(value, 2);
+                    var str = value.ToString(CultureInfo.InvariantCulture);
                     if (value > 0)
-                        amps.Append(value + ":");
+                        amps.Append(str + ":");
                     else {
                         amps.Append(0 + ":");
                     }
