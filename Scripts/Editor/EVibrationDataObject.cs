@@ -169,7 +169,23 @@ namespace HapticFeedback {
         }
 
         private void AmplitudeField() {
+            EditorGUI.BeginChangeCheck();
             _vibration.data.AmplitudeCurve = EditorGUILayout.CurveField("Amplitude", _vibration.data.AmplitudeCurve);
+            if (EditorGUI.EndChangeCheck()) {
+                AmplitudeSanityCheck();
+            }
+        }
+
+        private void AmplitudeSanityCheck() {
+            _helpString = "";
+            var curve = _vibration.data.AmplitudeCurve;
+            var maxTime = curve.keys[curve.length - 1].time;
+            for (var time = 0.0f; time <= maxTime; time += 0.1f) {
+                var y = curve.Evaluate(time);
+                if (y > 1) {
+                    _helpString = "Amplitude should be between 0 - 1 on the Y coordinate system";
+                }
+            }
         }
 
         private void HelpBox() {
@@ -182,8 +198,7 @@ namespace HapticFeedback {
             EditorGUI.BeginChangeCheck();
             IpAddress = EditorGUILayout.DelayedTextField("IP Address", IpAddress);
             if (EditorGUI.EndChangeCheck()) {
-                _helpString = "";
-                ParseIp();
+                IpSanityCheck();
             }
         }
 
@@ -196,7 +211,8 @@ namespace HapticFeedback {
                 EditorLayoutDrawer.Popup("Connected server", _activeVibrationServers, SelectedServerIndex);
         }
 
-        private void ParseIp() {
+        private void IpSanityCheck() {
+            _helpString = "";
             string[] splitIp = IpAddress.Split('.');
             var ipSegments = new byte[splitIp.Length];
             if (ipSegments.Length != 4) {

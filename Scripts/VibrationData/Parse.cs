@@ -62,9 +62,13 @@ namespace HapticFeedback {
             var durations = new long[length * 2];
             var j = 0;
             for (var i = 0; i < length; i++) {
-                if (normalizedAmplitudes[i] <= 0) {
+                var amplitude = normalizedAmplitudes[i];
+                if (amplitude > 1) {
+                    amplitude = 1;
+                }
+                if (amplitude <= 0) {
                     // waits
-                    amplitudes[j] = (int) (255 * normalizedAmplitudes[i]);
+                    amplitudes[j] = (int) (255 * amplitude);
                     durations[j] = (long) (interval * 1000);
 
                     // vibrates
@@ -77,7 +81,7 @@ namespace HapticFeedback {
                     durations[j] = 0;
 
                     // vibrates
-                    amplitudes[++j] = (int) (255 * normalizedAmplitudes[i]);
+                    amplitudes[++j] = (int) (255 * amplitude);
                     durations[j] = (long) (interval * 1000);
                 }
 
