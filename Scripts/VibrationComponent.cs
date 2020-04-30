@@ -12,6 +12,7 @@ namespace HapticFeedback.Component
         public class Data : BaseComponent
         {
             [SerializeField] private VibrationDataObject vibrationDataObject;
+            [SerializeField] private bool shouldDefaultToNormalVibrateIfNoHapticEngineFound;
             [SerializeField] [HideInInspector] private LogicConnections _connections;
             public override void Start(in InitArgs initData) {
 #if UNITY_EDITOR
@@ -29,7 +30,7 @@ namespace HapticFeedback.Component
             {
                 switch (index) {
                     case 0:
-                        vibrationDataObject.data.Vibrate();
+                        vibrationDataObject.data.Vibrate(shouldDefaultToNormalVibrateIfNoHapticEngineFound);
                         break;
                 }
                 return null;
