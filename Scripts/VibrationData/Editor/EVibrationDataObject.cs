@@ -164,8 +164,11 @@ namespace HapticFeedback {
             } else if (percentage > 0.75f && percentage <= 1f) {
                 label = "best quality";
             }
-
+            EditorGUI.BeginChangeCheck();
             _vibration.data.SampleInterval = EditorGUILayout.Slider(label, _vibration.data.SampleInterval, min, max);
+            if (EditorGUI.EndChangeCheck()) {
+                EditorUtility.SetDirty(_vibration);
+            }
         }
 
         private void AmplitudeField() {
@@ -173,6 +176,7 @@ namespace HapticFeedback {
             _vibration.data.AmplitudeCurve = EditorGUILayout.CurveField("Amplitude", _vibration.data.AmplitudeCurve);
             if (EditorGUI.EndChangeCheck()) {
                 AmplitudeSanityCheck();
+                EditorUtility.SetDirty(_vibration);
             }
         }
 
