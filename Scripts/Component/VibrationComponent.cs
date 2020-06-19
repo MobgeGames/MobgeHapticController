@@ -15,7 +15,7 @@ namespace HapticFeedback.Component {
             public override void Start(in InitArgs initData) {
 #if UNITY_EDITOR
                 if (vibrationDataObject == null)
-                    Debug.LogError("Vibration data is missing. Did you forget to put it into the component?");
+                    Debug.Log("Vibration data is missing. Did you forget to put it into the component?");
 #endif
             }
 
