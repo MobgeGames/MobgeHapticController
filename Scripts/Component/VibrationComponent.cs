@@ -13,10 +13,6 @@ namespace HapticFeedback.Component {
             [SerializeField] [HideInInspector] private LogicConnections _connections;
 
             public override void Start(in InitArgs initData) {
-#if UNITY_EDITOR
-                if (vibrationDataObject == null)
-                    Debug.Log("Vibration data is missing. Did you forget to put it into the component?");
-#endif
             }
 
             public override LogicConnections Connections {
@@ -27,6 +23,10 @@ namespace HapticFeedback.Component {
             public override object HandleInput(ILogicComponent sender, int index, object input) {
                 switch (index) {
                     case 0:
+#if UNITY_EDITOR
+                        if (vibrationDataObject == null)
+                            Debug.Log("Vibration data is missing. Did you forget to put it into the component?");
+#endif
                         vibrationDataObject.data.Vibrate(shouldDefaultToNormalVibrateIfNoHapticEngineFound);
                         break;
                     case 1:
