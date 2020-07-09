@@ -67,6 +67,7 @@ namespace HapticFeedback {
                     amplitude = 1;
                 }
                 if (amplitude <= 0) {
+                    amplitude = 0;
                     // waits
                     amplitudes[j] = (int) (255 * amplitude);
                     durations[j] = (long) (interval * 1000);
