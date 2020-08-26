@@ -15,7 +15,6 @@ namespace HapticFeedback {
         private bool _looping = false;
         
         protected override void OnPlay() {
-            Debug.Log("onplay");
             vibrationData.data.Vibrate(defaultToRegularVibration);
             if (loop) {
                 var curve = vibrationData.data.AmplitudeCurve;
