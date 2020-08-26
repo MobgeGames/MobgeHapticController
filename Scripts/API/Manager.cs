@@ -41,7 +41,7 @@ namespace HapticFeedback {
         public static int HeavyAmplitude = 255;
         private static int _sdkVersion = -1;
 
-        #region Default haptic patterns
+        #region Android representations of default ios haptic patterns
         /// <summary>
         /// These custom patterns are used to replicate haptic(iOS) behavior on Android
         /// </summary>
@@ -235,8 +235,10 @@ namespace HapticFeedback {
             if (!IsAndroid)
                 return;
             if (AndroidSDKVersion() < 26) {
+                Debug.Log("old");
                 AndroidVibrator.Call("vibrate", pattern, repeat);
             } else {
+                Debug.Log("new");
                 VibrationEffectClassInitialization();
                 VibrationEffect = VibrationEffectClass.CallStatic<AndroidJavaObject>("createWaveform",
                     new object[] {pattern, amplitudes, repeat});
