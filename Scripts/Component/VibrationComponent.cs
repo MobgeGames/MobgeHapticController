@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Mobge;
-using Mobge.BrigRex;
+using Mobge.Core;
 using UnityEngine;
 
 namespace HapticFeedback.Component {

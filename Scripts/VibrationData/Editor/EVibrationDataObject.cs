@@ -104,25 +104,24 @@ namespace HapticFeedback {
         public override void OnInspectorGUI() {
             using (new EditorGUILayout.VerticalScope("box")) {
                 AmplitudeField();
-                using (BackgroundColorScope(PastelBlue)) {
-                    using (new EditorGUILayout.VerticalScope("box")) {
-                        SampleIntervalField();
-                    }
+
+                using (new EditorGUILayout.VerticalScope("box")) {
+                    SampleIntervalField();
                 }
 
-                using (BackgroundColorScope(PastelOliveGreen)) {
-                    using (new EditorGUILayout.VerticalScope("box")) {
-                        if (IsAutoDiscoveryOn) {
-                            AutoDiscoveryField();
-                        }
-                        else {
-                            IpField();
-                            PortField();
-                        }
 
-                        DiscoveryConfigurationToggle();
+                using (new EditorGUILayout.VerticalScope("box")) {
+                    if (IsAutoDiscoveryOn) {
+                        AutoDiscoveryField();
                     }
+                    else {
+                        IpField();
+                        PortField();
+                    }
+
+                    DiscoveryConfigurationToggle();
                 }
+
 
                 HelpBox();
                 SendVibrationButton();

@@ -1,4 +1,4 @@
-using Mobge.BrigRex;
+using Mobge.Core;
 using UnityEditor;
 using UnityEngine;
 
